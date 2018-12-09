@@ -12,4 +12,11 @@ collection
 *.tar
 *.zip
 *.gz
-training
+training/lib
+training/bin
+training/include
+training/pyvenv.cfg
+training/pip-selfcheck.json
+training/data
+training/__pycache__
+scrapping/6dollars/training
