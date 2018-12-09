@@ -1,0 +1,8 @@
+scrapping/lifeIsGood/bin
+scrapping/lifeIsGood/include
+scrapping/lifeIsGood/images
+scrapping/lifeIsGood/lib
+scrapping/lifeIsGood/pip-selfcheck.json
+pyvenv.cfg
+.vscode
+.DS_Store
