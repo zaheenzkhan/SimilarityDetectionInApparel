@@ -14,9 +14,9 @@ else:
     print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
 
 num_classes = 2
-image_shape = (160, 576)
+image_shape = (258, 258)
 EPOCHS = 40
-BATCH_SIZE = 16
+BATCH_SIZE = 1
 DROPOUT = 0.75
 
 # Specify these directory paths
@@ -64,6 +64,8 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # Upsample fcn8 with size depth=(4096?) to match size of layer 4 so that we can add skip connection with 4th layer
     fcn9 = tf.layers.conv2d_transpose(fcn8, filters=layer4.get_shape().as_list()[-1],
                                       kernel_size=4, strides=(2, 2), padding='SAME', name="fcn9")
+    print(fcn9.get_shape().as_list())
+    print(layer4.get_shape().as_list())
 
     # Add a skip connection between current final layer fcn8 and 4th layer
     fcn9_skip_connected = tf.add(fcn9, layer4, name="fcn9_plus_vgg_layer4")
@@ -136,7 +138,8 @@ def run():
         # Returns the three layers, keep probability and input layer from the vgg architecture
         image_input, keep_prob, layer3, layer4, layer7 = load_vgg(
             session, vgg_path)
-
+        print("Printing shape:")
+#        print(layer4.get_shape().as_list())
         # The resulting network architecture from adding a decoder on top of the given vgg model
         model_output = layers(layer3, layer4, layer7, num_classes)
 
