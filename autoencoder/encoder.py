@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import random
 import cv2
+from PIL import Image
 from tensorflow.examples.tutorials.mnist import input_data
 from tensorflow.contrib.layers import fully_connected
 
@@ -24,10 +25,10 @@ lr=0.001
 actf=tf.nn.relu
 # actf = tf.nn.sigmoid
 
-num_epoch = 10
+num_epoch = 100
 batch_size = 3
 num_test_images = 10
-image_shape=(1,258*258)
+image_shape=(258*258)
 last=0
 
 data_folder="./data"
@@ -50,23 +51,12 @@ def get_batches_fn(batch_size):
         images = []
         for image_file in image_paths[batch_i:batch_i + batch_size]:
             # Re-size to image_shape
-            # image = scipy.misc.imresize(scipy.misc.imread(image_file),image_shape)
-            image = cv2.imread(image_file,0) / 255
-            gray = cv2.resize(image,image_shape)
-            img = gray[:,0]
-            # image = image.ravel()
-            images.append(img)
-            # if len(images ) is 0:
-            #     images = gray
-            # else:
-            #     images = np.vstack([gray,images])
-        # xsend = np.array(images)[:,:,1]
-#         f, a = plt.subplots(5, 3, figsize=(258, 258))
-#         for i in range(len(X_batch)):
-#             a[0][i].imshow(np.reshape(images[i], (258, 258)))
 
-#         fig = plt.figure()
-#         fig.savefig('orig_figure.png')
+            image=Image.open(image_file)
+            image = image.convert("L")
+            image = np.array(image,dtype=np.float32)/255
+            image = np.resize(image,image_shape)
+            images.append(image)
         return images,images
 
 
@@ -118,14 +108,23 @@ with tf.Session() as sess:
             X_batch, y_batch = get_batches_fn(batch_size)
             sess.run(train, feed_dict={X: X_batch})
             last+=batch_size
-
-        train_loss = loss.eval(feed_dict={X: X_batch})
-        print("epoch {} loss {}".format(epoch, train_loss))
         if epoch % 10 == 0:
-          modelsaver.save(sess, './model.ckpt')
+            train_loss = loss.eval(feed_dict={X: X_batch})
+            print("epoch {} loss {}".format(epoch, train_loss))
+        # if epoch % 10 == 0:
+        #     modelsaver.save(sess, './model.ckpt')
+    results = output_layer.eval(feed_dict={X: X_batch})
 
-        results = output_layer.eval(feed_dict={X: X_batch})
-        modelsaver.save(sess, './model.ckpt')
+    modelsaver.save(sess, './model.ckpt')
+
+    npres = np.array(results[0], dtype=np.float64, copy=True)
+    print(npres)
+    img = np.array(np.resize(npres, (258, 258)),dtype=np.float32) * 255
+    img = img.astype(np.uint8)
+    print(img)
+    im_pil = Image.fromarray(img)
+    im_pil.save("img0.png", "PNG")
+
 
 # # Comparing original images with reconstructions
 #     f, a = plt.subplots(2, 3, figsize=(258, 258))
